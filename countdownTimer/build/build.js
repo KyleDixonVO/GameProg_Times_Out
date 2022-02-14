@@ -1118,6 +1118,7 @@ function onReady(e) {
     console.log(">> adding sprites to game");
     background = assetManager.getSprite("sprites", "other/background", 0, 0);
     stage.addChild(background);
+    stage.on("countDownFinish", onCountDownFinish, null, true);
     plane = new Plane_1.Plane(stage, assetManager);
     plane.speed = 4;
     plane.direction = Plane_1.Plane.RIGHT;
@@ -1132,6 +1133,9 @@ function onTick(e) {
     document.getElementById("fps").innerHTML = String(createjs.Ticker.getMeasuredFPS());
     plane.update();
     stage.update();
+}
+function onCountDownFinish() {
+    plane.killMe();
 }
 function main() {
     console.log(">> initializing");
@@ -1166,7 +1170,7 @@ class Plane {
         this._direction = Plane.UP;
         this._moving = false;
         this.stage = stage;
-        this._sprite = assetManager.getSprite("sprites", "plane/alive", 300, 300);
+        this._sprite = assetManager.getSprite("sprites", "plane/alive", 100, 300);
         this.eventStageExit = new createjs.Event("stageExit", true, false);
         stage.addChild(this._sprite);
     }
@@ -1235,7 +1239,6 @@ class Plane {
                 if (this._sprite.x < -(height / 2)) {
                     this._sprite.x = Constants_1.STAGE_WIDTH + (height / 2);
                     sprite.dispatchEvent(this.eventStageExit);
-                    ;
                 }
             }
             else if (this._direction == Plane.RIGHT) {
@@ -1246,6 +1249,15 @@ class Plane {
                 }
             }
         }
+    }
+    onAnimationEnd(e) {
+        this.stage.removeChild(e.target);
+    }
+    killMe() {
+        console.log("Kill Me Called");
+        this._moving = false;
+        this.sprite.gotoAndPlay("plane/dead");
+        this.sprite.on("animationend", this.onAnimationEnd, this, true);
     }
 }
 exports.Plane = Plane;
@@ -1274,7 +1286,9 @@ class StopWatch {
         this.txtSeconds.letterSpacing = 1;
         this.txtSeconds.x = 10;
         this.txtSeconds.y = 10;
+        this.stage = stage;
         stage.addChild(this.txtSeconds);
+        this.eventCountDownFinish = new createjs.Event("countDownFinish", true, false);
     }
     get seconds() {
         return this._seconds;
@@ -1287,6 +1301,8 @@ class StopWatch {
             this.txtSeconds.text = this._seconds.toString();
             if (this.seconds <= 0) {
                 window.clearInterval(this.timer);
+                this.stage.dispatchEvent(this.eventCountDownFinish);
+                console.log("event dispatched");
             }
         }, 1000);
     }
@@ -2038,7 +2054,7 @@ exports.Logger = WebpackLogger;
 /*!*****************************************************************!*\
   !*** ./node_modules/webpack/lib/logging/createConsoleLogger.js ***!
   \*****************************************************************/
-/***/ (function(module, __unused_webpack_exports, __nested_webpack_require_10785__) {
+/***/ (function(module, __unused_webpack_exports, __nested_webpack_require_11148__) {
 
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
@@ -2081,7 +2097,7 @@ function _arrayLikeToArray(arr, len) {
   return arr2;
 }
 
-var _require = __nested_webpack_require_10785__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
+var _require = __nested_webpack_require_11148__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
     LogType = _require.LogType;
 /** @typedef {import("../../declarations/WebpackOptions").FilterItemTypes} FilterItemTypes */
 
@@ -2356,7 +2372,7 @@ module.exports = function (_ref) {
 /*!*****************************************************!*\
   !*** ./node_modules/webpack/lib/logging/runtime.js ***!
   \*****************************************************/
-/***/ (function(__unused_webpack_module, exports, __nested_webpack_require_20872__) {
+/***/ (function(__unused_webpack_module, exports, __nested_webpack_require_21553__) {
 
 /*
 	MIT License http://www.opensource.org/licenses/mit-license.php
@@ -2382,12 +2398,12 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
-var SyncBailHook = __nested_webpack_require_20872__(/*! tapable/lib/SyncBailHook */ "./client-src/modules/logger/SyncBailHookFake.js");
+var SyncBailHook = __nested_webpack_require_21553__(/*! tapable/lib/SyncBailHook */ "./client-src/modules/logger/SyncBailHookFake.js");
 
-var _require = __nested_webpack_require_20872__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
+var _require = __nested_webpack_require_21553__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
     Logger = _require.Logger;
 
-var createConsoleLogger = __nested_webpack_require_20872__(/*! ./createConsoleLogger */ "./node_modules/webpack/lib/logging/createConsoleLogger.js");
+var createConsoleLogger = __nested_webpack_require_21553__(/*! ./createConsoleLogger */ "./node_modules/webpack/lib/logging/createConsoleLogger.js");
 /** @type {createConsoleLogger.LoggerOptions} */
 
 
@@ -2435,7 +2451,7 @@ exports.hooks = {
 /******/ 	var __webpack_module_cache__ = {};
 /******/ 	
 /******/ 	// The require function
-/******/ 	function __nested_webpack_require_22988__(moduleId) {
+/******/ 	function __nested_webpack_require_23748__(moduleId) {
 /******/ 		// Check if module is in cache
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
@@ -2449,7 +2465,7 @@ exports.hooks = {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_22988__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_23748__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -2459,9 +2475,9 @@ exports.hooks = {
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	!function() {
 /******/ 		// define getter functions for harmony exports
-/******/ 		__nested_webpack_require_22988__.d = function(exports, definition) {
+/******/ 		__nested_webpack_require_23748__.d = function(exports, definition) {
 /******/ 			for(var key in definition) {
-/******/ 				if(__nested_webpack_require_22988__.o(definition, key) && !__nested_webpack_require_22988__.o(exports, key)) {
+/******/ 				if(__nested_webpack_require_23748__.o(definition, key) && !__nested_webpack_require_23748__.o(exports, key)) {
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
@@ -2470,13 +2486,13 @@ exports.hooks = {
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	!function() {
-/******/ 		__nested_webpack_require_22988__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
+/******/ 		__nested_webpack_require_23748__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	!function() {
 /******/ 		// define __esModule on exports
-/******/ 		__nested_webpack_require_22988__.r = function(exports) {
+/******/ 		__nested_webpack_require_23748__.r = function(exports) {
 /******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
@@ -2491,11 +2507,11 @@ var __webpack_exports__ = {};
 /*!********************************************!*\
   !*** ./client-src/modules/logger/index.js ***!
   \********************************************/
-__nested_webpack_require_22988__.r(__webpack_exports__);
-/* harmony export */ __nested_webpack_require_22988__.d(__webpack_exports__, {
+__nested_webpack_require_23748__.r(__webpack_exports__);
+/* harmony export */ __nested_webpack_require_23748__.d(__webpack_exports__, {
 /* harmony export */   "default": function() { return /* reexport default export from named module */ webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__; }
 /* harmony export */ });
-/* harmony import */ var webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_22988__(/*! webpack/lib/logging/runtime.js */ "./node_modules/webpack/lib/logging/runtime.js");
+/* harmony import */ var webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_23748__(/*! webpack/lib/logging/runtime.js */ "./node_modules/webpack/lib/logging/runtime.js");
 
 }();
 var __webpack_export_target__ = exports;
@@ -2520,13 +2536,13 @@ if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target
 /*!******************************************!*\
   !*** ./node_modules/strip-ansi/index.js ***!
   \******************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __nested_webpack_require_368__) {
+/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __nested_webpack_require_376__) {
 
-__nested_webpack_require_368__.r(__webpack_exports__);
-/* harmony export */ __nested_webpack_require_368__.d(__webpack_exports__, {
+__nested_webpack_require_376__.r(__webpack_exports__);
+/* harmony export */ __nested_webpack_require_376__.d(__webpack_exports__, {
 /* harmony export */   "default": function() { return /* binding */ stripAnsi; }
 /* harmony export */ });
-/* harmony import */ var ansi_regex__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_368__(/*! ansi-regex */ "./node_modules/strip-ansi/node_modules/ansi-regex/index.js");
+/* harmony import */ var ansi_regex__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_376__(/*! ansi-regex */ "./node_modules/strip-ansi/node_modules/ansi-regex/index.js");
 
 function stripAnsi(string) {
   if (typeof string !== 'string') {
@@ -2542,10 +2558,10 @@ function stripAnsi(string) {
 /*!******************************************************************!*\
   !*** ./node_modules/strip-ansi/node_modules/ansi-regex/index.js ***!
   \******************************************************************/
-/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __nested_webpack_require_1387__) {
+/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __nested_webpack_require_1417__) {
 
-__nested_webpack_require_1387__.r(__webpack_exports__);
-/* harmony export */ __nested_webpack_require_1387__.d(__webpack_exports__, {
+__nested_webpack_require_1417__.r(__webpack_exports__);
+/* harmony export */ __nested_webpack_require_1417__.d(__webpack_exports__, {
 /* harmony export */   "default": function() { return /* binding */ ansiRegex; }
 /* harmony export */ });
 function ansiRegex() {
@@ -2565,7 +2581,7 @@ function ansiRegex() {
 /******/ 	var __webpack_module_cache__ = {};
 /******/ 	
 /******/ 	// The require function
-/******/ 	function __nested_webpack_require_2352__(moduleId) {
+/******/ 	function __nested_webpack_require_2405__(moduleId) {
 /******/ 		// Check if module is in cache
 /******/ 		var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 		if (cachedModule !== undefined) {
@@ -2579,7 +2595,7 @@ function ansiRegex() {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_2352__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_2405__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -2589,9 +2605,9 @@ function ansiRegex() {
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	!function() {
 /******/ 		// define getter functions for harmony exports
-/******/ 		__nested_webpack_require_2352__.d = function(exports, definition) {
+/******/ 		__nested_webpack_require_2405__.d = function(exports, definition) {
 /******/ 			for(var key in definition) {
-/******/ 				if(__nested_webpack_require_2352__.o(definition, key) && !__nested_webpack_require_2352__.o(exports, key)) {
+/******/ 				if(__nested_webpack_require_2405__.o(definition, key) && !__nested_webpack_require_2405__.o(exports, key)) {
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
@@ -2600,13 +2616,13 @@ function ansiRegex() {
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	!function() {
-/******/ 		__nested_webpack_require_2352__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
+/******/ 		__nested_webpack_require_2405__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
 /******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	!function() {
 /******/ 		// define __esModule on exports
-/******/ 		__nested_webpack_require_2352__.r = function(exports) {
+/******/ 		__nested_webpack_require_2405__.r = function(exports) {
 /******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
@@ -2621,8 +2637,8 @@ var __webpack_exports__ = {};
 /*!************************************************!*\
   !*** ./client-src/modules/strip-ansi/index.js ***!
   \************************************************/
-__nested_webpack_require_2352__.r(__webpack_exports__);
-/* harmony import */ var strip_ansi__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_2352__(/*! strip-ansi */ "./node_modules/strip-ansi/index.js");
+__nested_webpack_require_2405__.r(__webpack_exports__);
+/* harmony import */ var strip_ansi__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_2405__(/*! strip-ansi */ "./node_modules/strip-ansi/index.js");
 
 /* harmony default export */ __webpack_exports__["default"] = (strip_ansi__WEBPACK_IMPORTED_MODULE_0__["default"]);
 }();
@@ -3631,7 +3647,7 @@ module.exports.formatError = function (err) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("93177be81f7ec15caffd")
+/******/ 		__webpack_require__.h = () => ("7a2c232d683e3f43390b")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

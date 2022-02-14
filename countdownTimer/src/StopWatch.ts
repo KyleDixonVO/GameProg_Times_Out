@@ -1,10 +1,13 @@
 import { AssetManager } from "./AssetManager";
+import { Plane } from "./Plane";
 
 export class StopWatch {
 
     private timer:number;
     private _seconds:number;
     private txtSeconds:createjs.BitmapText;
+    private eventCountDownFinish:createjs.Event;
+    private stage:createjs.StageGL;
 
     constructor(stage:createjs.StageGL, assetManager:AssetManager) {
         // initialization
@@ -15,7 +18,10 @@ export class StopWatch {
         this.txtSeconds.letterSpacing = 1;
         this.txtSeconds.x = 10;
         this.txtSeconds.y = 10;
+        this.stage = stage;
         stage.addChild(this.txtSeconds);
+
+        this.eventCountDownFinish = new createjs.Event("countDownFinish", true, false);
     }
 
     // ------------------------------------------------------ gets/sets
@@ -37,6 +43,8 @@ export class StopWatch {
 
             if (this.seconds <= 0){
                 window.clearInterval(this.timer);
+                this.stage.dispatchEvent(this.eventCountDownFinish);
+                console.log("event dispatched");
             }
         }, 1000);
     }

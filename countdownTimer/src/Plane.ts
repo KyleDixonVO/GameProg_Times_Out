@@ -27,7 +27,7 @@ export class Plane {
         this._moving = false;
         this.stage = stage;
 
-        this._sprite = assetManager.getSprite("sprites", "plane/alive", 300, 300);
+        this._sprite = assetManager.getSprite("sprites", "plane/alive", 100, 300);
 
         // construct custom event object for object moving off stage
         this.eventStageExit = new createjs.Event("stageExit", true, false);
@@ -112,7 +112,7 @@ export class Plane {
                 this._sprite.x = this._sprite.x - this._speed;
                 if (this._sprite.x < -(height / 2)) {
                     this._sprite.x = STAGE_WIDTH + (height / 2)
-                    sprite.dispatchEvent(this.eventStageExit);;
+                    sprite.dispatchEvent(this.eventStageExit);
                 }
             } else if (this._direction == Plane.RIGHT) {
                 // moving right
@@ -123,5 +123,16 @@ export class Plane {
                 }
             }
         }
+    }
+
+    private onAnimationEnd(e:createjs.Event){
+        this.stage.removeChild(e.target);
+    }
+
+    public killMe(){
+        console.log("Kill Me Called");
+        this._moving = false;
+        this.sprite.gotoAndPlay("plane/dead");
+        this.sprite.on("animationend", this.onAnimationEnd, this, true)
     }
 }

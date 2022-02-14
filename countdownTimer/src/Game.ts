@@ -27,6 +27,7 @@ function onReady(e:createjs.Event):void {
     // construct game object sprites
     background = assetManager.getSprite("sprites","other/background",0,0);
     stage.addChild(background);
+    stage.on("countDownFinish", onCountDownFinish, null, true)
 
     plane = new Plane(stage, assetManager);
     plane.speed = 4;
@@ -48,11 +49,14 @@ function onTick(e:createjs.Event):void {
 
     // This is your game loop :)
     plane.update();
-
+    
     // update the stage!
     stage.update();
 }
 
+function onCountDownFinish(){
+    plane.killMe();
+}
 // --------------------------------------------------- main method
 function main():void {
     console.log(">> initializing");
